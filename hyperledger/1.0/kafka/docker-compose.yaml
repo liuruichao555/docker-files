@@ -14,8 +14,9 @@ services:
       - CONFIGTX_ORDERER_ORDERERTYPE=kafka
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_GENESISPROFILE=TwoOrgs
+#      - ORDERER_GENERAL_GENESISMETHOD=file
+#      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/twoorgs.orderer.block
 #      - ORDERER_GENERAL_TLS_ENABLED=false
-#      - ORDERER_GENERAL_GENESISMETHOD=provisional
 #      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
@@ -65,6 +66,7 @@ services:
     container_name: peer0
     image: hyperledger/fabric-peer
     environment:
+      - GOPATH=/opt/gopath
       - CORE_PEER_ID=peer0
       - CORE_PEER_ADDRESS=peer0:7051
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0:7051
@@ -73,10 +75,9 @@ services:
       - CORE_NEXT=true
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
       - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
 #- CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
@@ -90,8 +91,10 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     volumes:
-       - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1:/etc/hyperledger/fabric/msp/sampleconfig
-       - ./foo.tx:/opt/gopath/src/github.com/hyperledger/fabric/foo.tx
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1:/etc/hyperledger/fabric/msp/sampleconfig
+      - ./foo.tx:/opt/gopath/src/github.com/hyperledger/fabric/foo.tx
+      - ./example:/opt/gopath/src/github.com/hyperledger/fabric/example
     ports:
       - 7051:7051
       - 7053:7053
