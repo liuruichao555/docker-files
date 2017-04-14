@@ -8,16 +8,15 @@ services:
     container_name: orderer0
     image: hyperledger/fabric-orderer
     environment:
-      - ORDERER_GENERAL_LOGLEVEL=DEBUG
+      - ORDERER_GENERAL_LOGLEVEL=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092]
       - CONFIGTX_ORDERER_ORDERERTYPE=kafka
-#- ORDERER_GENERAL_GENESISMETHOD=file
-#      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
-#- ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/myblock.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_GENESISPROFILE=TwoOrgs
-      - ORDERER_GENERAL_TLS_ENABLED=false
+#      - ORDERER_GENERAL_TLS_ENABLED=false
+#      - ORDERER_GENERAL_GENESISMETHOD=provisional
+#      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
@@ -92,6 +91,7 @@ services:
     command: peer node start --peer-defaultchain=false
     volumes:
        - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1:/etc/hyperledger/fabric/msp/sampleconfig
+       - ./foo.tx:/opt/gopath/src/github.com/hyperledger/fabric/foo.tx
     ports:
       - 7051:7051
       - 7053:7053
