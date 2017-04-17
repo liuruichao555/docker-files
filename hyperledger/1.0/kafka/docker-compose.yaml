@@ -16,7 +16,7 @@ services:
       - ORDERER_GENERAL_GENESISPROFILE=TwoOrgs
       - ORDERER_GENERAL_GENESISMETHOD=provisional
 #      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/twoorgs.orderer.block
-      - ORDERER_GENERAL_PROFILE_ENABLED=true
+      - ORDERER_GENERAL_PROFILE_ENABLED=true # debug
 #      - ORDERER_GENERAL_TLS_ENABLED=false
 #      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
