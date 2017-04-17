@@ -14,14 +14,16 @@ services:
       - CONFIGTX_ORDERER_ORDERERTYPE=kafka
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_GENESISPROFILE=TwoOrgs
-#      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISMETHOD=provisional
 #      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/twoorgs.orderer.block
+      - ORDERER_GENERAL_PROFILE_ENABLED=true
 #      - ORDERER_GENERAL_TLS_ENABLED=false
 #      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
-      - '7050'
+      - 7050:7050
+      - 6060:6060
     volumes:
       - ./config/channel/configtx.yaml:/etc/hyperledger/fabric/configtx.yaml
       - ./config/crypto-config/ordererOrganizations/ordererOrg1/orderers/ordererOrg1orderer1:/etc/hyperledger/fabric/msp/sampleconfig
@@ -62,6 +64,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     depends_on:
       - zookeeper
+
   peer0:
     container_name: peer0
     image: hyperledger/fabric-peer
@@ -105,4 +108,4 @@ services:
     container_name: couchdb0
     image: hyperledger/fabric-couchdb
     ports:
-      - "5984:5984"
+      - 5984:5984
