@@ -108,8 +108,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1:/etc/hyperledger/fabric/msp/sampleconfig
-      - ./foo.tx:/opt/gopath/src/github.com/hyperledger/fabric/foo.tx
-      - ./example:/opt/gopath/src/github.com/hyperledger/fabric/example
     ports:
       - 7051:7051
       - 7053:7053
@@ -122,8 +120,8 @@ services:
     environment:
       - GOPATH=/opt/gopath
       - CORE_PEER_ID=peer1
-      - CORE_PEER_ADDRESS=peer1:8051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1:8051
+      - CORE_PEER_ADDRESS=peer1:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1:7051
       - CORE_LOGGING_LEVEL=INFO
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_NEXT=true
@@ -148,11 +146,33 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer2:/etc/hyperledger/fabric/msp/sampleconfig
     ports:
-      - 8051:8051
-      - 8053:8053
+      - 8051:7051
+      - 8053:7053
     depends_on:
       - orderer0
 
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-peer:${ARCH_TAG}
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_NEXT=true
+      - CORE_PEER_ENDORSER_ENABLED=true
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=false
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=kafka_default
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    volumes:
+      - ./foo.tx:/opt/gopath/src/github.com/hyperledger/fabric/foo.tx
+      - ./example:/opt/gopath/src/github.com/hyperledger/fabric/example
+      - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer2:/etc/hyperledger/fabric/msp/sampleconfig
+    depends_on:
+      - orderer0
+      - peer0
+      - peer1
 
   couchdb0:
     container_name: couchdb0
