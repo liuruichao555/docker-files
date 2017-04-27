@@ -113,7 +113,7 @@ services:
       - CORE_PEER_GOSSIP_IGNORESECURITY=true
       - CORE_PEER_LOCALMSPID=Org0MSP
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; '
+#    command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; '
     volumes:
         - /var/run/:/host/var/run/
         - ./chaincodes:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode
