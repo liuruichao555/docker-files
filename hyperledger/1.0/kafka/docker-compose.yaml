@@ -115,6 +115,8 @@ services:
 #- CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=admin
       - CORE_PEER_TLS_ENABLED=false
 #      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/signcerts/peer0Signer.pem
 #      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/sampleconfig/keystore/peer0Signer.pem
@@ -132,6 +134,7 @@ services:
       - 7053:7053
     depends_on:
       - orderer0
+      - couchdb0
 
 #  peer1:
 #    container_name: peer1
@@ -197,6 +200,10 @@ services:
   couchdb0:
     container_name: couchdb0
     image: hyperledger/fabric-couchdb:${ARCH_TAG}
+    environment:
+      - NODENAME=couchdb0
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=admin
     ports:
       - 5984:5984
 
