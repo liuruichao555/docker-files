@@ -1,23 +1,23 @@
 version: '2'
 services:
   ca0:
+    container_name: ca
     image: hyperledger/fabric-ca:${ARCH_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
     ports:
       - 7054:7054
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/peerOrg1-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/d8a5b3cac1b821f6e4b487ceaf1fd239cdcfc310894150908b90f05e9179556a_sk -b admin:adminpw --tls.certfile /etc/hyperledger/tls/cas/peerOrg1/cert.pem --tls.keyfile /etc/hyperledger/tls/cas/peerOrg1/key.pem'
-    volumes:
-      - ./config/crypto-config/peerOrganizations/peerOrg1/ca/:/etc/hyperledger/fabric-ca-server-config
-      - ./config/tls:/etc/hyperledger/tls
-    container_name: ca
+    command: sh -c 'fabric-ca-server start admin:adminpw'
+    #volumes:
+      #- ./config/crypto-config/peerOrganizations/peerOrg1/ca/:/etc/hyperledger/fabric-ca-server-config
+      #- ./config/tls:/etc/hyperledger/tls
 
   zookeeper:
     container_name: zookeeper
     image: hyperledger/fabric-zookeeper:${ARCH_TAG}
 
-  orderer0:
-    container_name: orderer0
+  orderer.example.com:
+    container_name: orderer.example.com
     image: hyperledger/fabric-orderer:${ARCH_TAG}
     environment:
       - GOPATH=/opt/gopath
@@ -26,20 +26,20 @@ services:
       - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092, kafka3:9092]
       - CONFIGTX_ORDERER_ORDERERTYPE=kafka
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_GENESISPROFILE=MyOrgs
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/orderer.block
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
 #      - ORDERER_GENERAL_GENESISMETHOD=provisional
-#      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/twoorgs.orderer.block
+      #- ORDERER_GENERAL_GENESISPROFILE=MyOrgs
 #      - ORDERER_GENERAL_PROFILE_ENABLED=true # debug
 #      - ORDERER_GENERAL_TLS_ENABLED=false
-#      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
       - 7050:7050
       - 6060:6060
     volumes:
-      - ./config/configtx.yaml:/etc/hyperledger/fabric/configtx.yaml
-      - ./config/crypto-config/ordererOrganizations/ordererOrg1/orderers/ordererOrg1orderer1:/etc/hyperledger/fabric/msp/sampleconfig
+      - ./config/orderer.block:/etc/hyperledger/configtx/orderer.block
+      - ./config/crypto-config/ordererOrganizations/example.com/msp:/etc/hyperledger/msp/orderer
     depends_on:
       - kafka0
       - kafka1
@@ -95,15 +95,15 @@ services:
       - zookeeper
 
 
-  peer0:
-    container_name: peer0
+  peer0.org1.example.com:
+    container_name: peer0.org1.example.com
     image: hyperledger/fabric-peer:${ARCH_TAG}
     environment:
       - GOPATH=/opt/gopath
-      - CORE_PEER_ID=peer0
-      - CORE_PEER_ADDRESS=peer0:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0:7051
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
       - CORE_LOGGING_LEVEL=INFO
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_NEXT=true
@@ -112,28 +112,28 @@ services:
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
       - CORE_PEER_PROFILE_ENABLED=true
-#- CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=admin
       - CORE_PEER_TLS_ENABLED=false
-#      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/signcerts/peer0Signer.pem
-#      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/sampleconfig/keystore/peer0Signer.pem
-#      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/cacerts/peerOrg0.pem
+      #- CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
+      #- CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/signcerts/peer0.org1.example.comSigner.pem
+      #- CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/sampleconfig/keystore/peer0.org1.example.comSigner.pem
+      #- CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/cacerts/peerOrg0.pem
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=kafka_default
       #- CORE_PEER_ADDRESSAUTODETECT=true
-      # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0
+      # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.example.com
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1:/etc/hyperledger/fabric/msp
+      - ./config/crypto-config/peerOrganizations/org1.example.com/msp:/etc/hyperledger/fabric/msp
     ports:
       - 7051:7051
       - 7053:7053
     depends_on:
-      - orderer0
+      - orderer.example.com
       - couchdb0
 
 #  peer1:
@@ -144,7 +144,7 @@ services:
 #      - CORE_PEER_ID=peer1
 #      - CORE_PEER_ADDRESS=peer1:7051
 #      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1:7051
-#      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0:7051
+#      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
 #      - CORE_LOGGING_LEVEL=INFO
 #      - CORE_PEER_LOCALMSPID=Org1MSP
 #      - CORE_NEXT=true
@@ -157,12 +157,12 @@ services:
 #      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
 #      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
 #      - CORE_PEER_TLS_ENABLED=false
-##      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/signcerts/peer0Signer.pem
-##      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/sampleconfig/keystore/peer0Signer.pem
+##      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/signcerts/peer0.org1.example.comSigner.pem
+##      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/msp/sampleconfig/keystore/peer0.org1.example.comSigner.pem
 ##      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/msp/sampleconfig/cacerts/peerOrg0.pem
 #      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=kafka_default
 #      #- CORE_PEER_ADDRESSAUTODETECT=true
-#      # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0
+#      # - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.example.com
 #    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
 #    command: peer node start --peer-defaultchain=false
 #    volumes:
@@ -183,7 +183,7 @@ services:
 #      - CORE_NEXT=true
 #      - CORE_PEER_ENDORSER_ENABLED=true
 #      - CORE_PEER_ID=cli
-#      - CORE_PEER_ADDRESS=peer0:7051
+#      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
 #      - CORE_PEER_LOCALMSPID=Org1MSP
 #      - CORE_PEER_TLS_ENABLED=false
 #      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=kafka_default
@@ -194,7 +194,7 @@ services:
 #      - ./config/crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer2:/etc/hyperledger/fabric/msp/sampleconfig
 #    depends_on:
 #      - orderer0
-#      - peer0
+#      - peer0.org1.example.com
 #      - peer1
 
   couchdb0:
