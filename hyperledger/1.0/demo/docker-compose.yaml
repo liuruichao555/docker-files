@@ -16,7 +16,7 @@ services:
     container_name: orderer.example.com
     image: hyperledger/fabric-orderer:${ARCH_TAG}
     environment:
-      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LOGLEVEL=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/orderer.block
@@ -28,7 +28,7 @@ services:
       - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/msp/orderer/tls/ca.crt]
 #      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/msp/orderer/tls/ca.crt, /etc/hyperledger/msp/peer0Org1/tls/ca.crt, /etc/hyperledger/msp/peer1Org1/tls/ca.crt, /etc/hyperledger/msp/peer0Org2/tls/ca.crt, /etc/hyperledger/msp/peer1Org2/tls/ca.crt]
       - GRPC_TRACE=all=true,
-      - GRPC_VERBOSITY=debug
+      - GRPC_VERBOSITY=INFO
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
